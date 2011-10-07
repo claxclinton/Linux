@@ -3,6 +3,11 @@
 #include "linux/workqueue.h"
 #include "linux/slab.h"
 
+/* This example shows usage of work queues. Both normal work and
+ * delayed work are demonstrated. The type my_work_t is used for both.
+ * When a work is actually performed, it output the value of the
+ * member x.
+ */
 #define FAILED_HERE() printk(KERN_ALERT "Failed %s:%d.\n", __FILE__, __LINE__)
 
 static int work_queue_module_init(void);
