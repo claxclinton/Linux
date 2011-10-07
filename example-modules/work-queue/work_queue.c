@@ -31,7 +31,8 @@ typedef struct
         int x;
 } my_work_t;
 
-my_work_t *work, work2;
+my_work_t *work1;
+my_work_t *work2;
 
 static void my_eq_function(struct work_struct *work)
 {
@@ -41,15 +42,26 @@ static void my_eq_function(struct work_struct *work)
         kfree((void*) work);
 }
 
-static int add_work_to_queue(struct workqueue_struct *queue, my_work_t *work,
+static int add_work_to_queue(struct workqueue_struct *queue,
+                             my_work_t **work_out,
                              void (func)(struct work_struct *), int x)
 {
+        my_work_t *work;
         int ret;
+
+        /* Allocate memory for work. */
+        work = (my_work_t *)kmalloc(sizeof(my_work_t), GFP_KERNEL);
+        if (!work)
+        {
+                printk(KERN_ALERT "Failed to alloc a my_work_t.\n");
+                FAILED_HERE();
+                return __LINE__;
+        }
+        *work_out = work;
         
         INIT_WORK((struct work_struct*)work, func);
         work->x = x;
         ret = queue_work(queue, (struct work_struct*)work);
-
         if (ret == 0)
         {
                 printk(KERN_ALERT "The work %p already added.\n", work);
@@ -64,6 +76,8 @@ static int work_queue_module_init(void)
 {
         int ret;
 
+        printk(KERN_ALERT "Clli work_queue example init.\n");
+
         /* Create a work queue first. */
         my_wq = create_workqueue("my_queue");
         if (!my_wq)
@@ -73,21 +87,18 @@ static int work_queue_module_init(void)
                 return __LINE__;
         }
 
-        /* Create the first work. */
-	printk(KERN_ALERT "Clli work_queue example init.\n");
-        work = (my_work_t *)kmalloc(sizeof(my_work_t), GFP_KERNEL);
-        if (!work)
-        {
-                printk(KERN_ALERT "kmalloc failed.\n");
-                FAILED_HERE();
-                return __LINE__;
-        }
-
         /* Queue the first work. */
-        ret = add_work_to_queue(my_wq, work, my_eq_function, 1);
+        ret = add_work_to_queue(my_wq, &work1, my_eq_function, 1);
         if (ret != 0)
         {
-                return __LINE__;
+                return ret;
+        }
+        
+        /* Queue the second work. */
+        ret = add_work_to_queue(my_wq, &work2, my_eq_function, 2);
+        if (ret != 0)
+        {
+                return ret;
         }
         
 	return 0;
@@ -95,5 +106,5 @@ static int work_queue_module_init(void)
   
 static void work_queue_module_exit(void)
 {
+        printk(KERN_ALERT "Clli work_queue example exits.\n");
 }
-
