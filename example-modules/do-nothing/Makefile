@@ -3,7 +3,7 @@ KVERSION = $(shell uname -r)
 
 M=$(PWD)
 
-obj-m := clli_example_module.o
+obj-m := do_nothing.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(M)
