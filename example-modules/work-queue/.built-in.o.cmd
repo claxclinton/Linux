@@ -1,0 +1,1 @@
+cmd_/home/clli/Programming/Linux/example-modules/work-queue/built-in.o :=  rm -f /home/clli/Programming/Linux/example-modules/work-queue/built-in.o; ar rcs /home/clli/Programming/Linux/example-modules/work-queue/built-in.o
