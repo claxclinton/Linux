@@ -1,3 +1,25 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include "linux/module.h"
 #include "linux/kernel.h"
 #include "linux/workqueue.h"
@@ -28,8 +50,9 @@ MODULE_PARM_DESC(work_queue_module_name, "Module template name");
 module_init(work_queue_module_init);
 module_exit(work_queue_module_exit);
 
-struct workqueue_struct *my_wq;
-
+/* This struct contains the data x, and the two types of work specification,
+ * the instant and the delayed type.
+ */
 typedef struct
 {
         union
@@ -40,10 +63,18 @@ typedef struct
         int x;
 } my_work_t;
 
+/* Work1 and work2 are just to differenciate between the two scheduled
+ * works. Work3_delayed is used to demonstrate the delayed work
+ * queue.
+ */
 my_work_t *work1;
 my_work_t *work2;
 my_work_t *work3_delayed;
 
+/* This is the only work queue that will be used in this example. */
+struct workqueue_struct *my_wq;
+
+/* Log the 'x' value of the currently running work. */
 static void log_work_info(struct work_struct *work)
 {
         my_work_t *my_work = (my_work_t *)work;
@@ -52,6 +83,9 @@ static void log_work_info(struct work_struct *work)
         kfree((void*) work);
 }
 
+/* Creates an instant work specification. It also sets the
+ * work-function to be executed and the x-value in the work struct.
+ */
 static int create_work_struct(my_work_t **work_out,
                               void (func)(struct work_struct *), int x)
 {
@@ -74,6 +108,8 @@ static int create_work_struct(my_work_t **work_out,
         return 0;
 }
 
+/* Adds an instant work (work1 or work2) to the work queue.
+ */
 static int add_work_to_queue(struct workqueue_struct *queue,
                              my_work_t **work_out,
                              void (func)(struct work_struct *), int x)
@@ -98,6 +134,9 @@ static int add_work_to_queue(struct workqueue_struct *queue,
         return 0;
 }
 
+/* Creates a delayed work specification with the specified value
+ * of 'x' and the given function.
+ */
 static int create_delayed_work(my_work_t **work_out,
                                void (func)(struct work_struct*), int x)
 {
@@ -120,6 +159,8 @@ static int create_delayed_work(my_work_t **work_out,
         return 0;
 }
 
+/* Adds a delayed work specification.
+ */
 static int add_work_to_queue_delayed(struct workqueue_struct *queue,
                                      my_work_t **work_out,
                                      void (func)(struct work_struct*), int x,
@@ -160,21 +201,21 @@ static int work_queue_module_init(void)
                 return __LINE__;
         }
 
-        /* Queue the first work. */
+        /* Queue work1. */
         ret = add_work_to_queue(my_wq, &work1, log_work_info, 1);
         if (ret != 0)
         {
                 return ret;
         }
         
-        /* Queue the second work. */
+        /* Queue work2. */
         ret = add_work_to_queue(my_wq, &work2, log_work_info, 2);
         if (ret != 0)
         {
                 return ret;
         }
         
-        /* Queue the the third work delayed. */
+        /* Queue work3_delayed. */
         ret = add_work_to_queue_delayed(my_wq, &work3_delayed, log_work_info,
                                         3, 100);
         if (ret != 0)
