@@ -1,36 +1,18 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* This example shows usage of work queues. Both normal work and
+ * delayed work are demonstrated. The type my_work_t is used for both.
+ * When a work is actually performed, it output the value of the
+ * member x.
+ */
 
 #include "linux/module.h"
 #include "linux/kernel.h"
 #include "linux/workqueue.h"
 #include "linux/slab.h"
 
-/* This example shows usage of work queues. Both normal work and
- * delayed work are demonstrated. The type my_work_t is used for both.
- * When a work is actually performed, it output the value of the
- * member x.
- */
-#define FAILED_HERE() printk(KERN_ALERT "Failed %s:%d.\n", __FILE__, __LINE__)
+#include "proc_info.h"
+
+#define FAILED_HERE() printk(KERN_ALERT "clli:Failed %s:%d.\n", \
+                             __FILE__, __LINE__)
 
 static int work_queue_module_init(void);
 static void work_queue_module_exit(void);
@@ -79,7 +61,7 @@ static void log_work_info(struct work_struct *work)
 {
         my_work_t *my_work = (my_work_t *)work;
 
-        printk("my_work.x = %d.\n", my_work->x);
+        printk(KERN_ALERT "clli: my_work.x = %d.\n", my_work->x);
         kfree((void*) work);
 }
 
@@ -95,7 +77,7 @@ static int create_work_struct(my_work_t **work_out,
         work = (my_work_t *)kmalloc(sizeof(my_work_t), GFP_KERNEL);
         if (!work)
         {
-                printk(KERN_ALERT "Failed to alloc a my_work_t.\n");
+                printk(KERN_ALERT "clli: Failed to alloc a my_work_t.\n");
                 FAILED_HERE();
                 *work_out = NULL;
                 return __LINE__;
@@ -126,7 +108,8 @@ static int add_work_to_queue(struct workqueue_struct *queue,
         ret = queue_work(queue, (struct work_struct*)*work_out);
         if (ret == 0)
         {
-                printk(KERN_ALERT "The work %p already added.\n", *work_out);
+                printk(KERN_ALERT "clli: The work %p already added.\n",
+                       *work_out);
                 FAILED_HERE();
                 return __LINE__;
         }
@@ -146,7 +129,7 @@ static int create_delayed_work(my_work_t **work_out,
         work = (my_work_t *)kmalloc(sizeof(my_work_t), GFP_KERNEL);
         if (!work)
         {
-                printk(KERN_ALERT "Failed to alloc a my_work_t.\n");
+                printk(KERN_ALERT "clli: Failed to alloc a my_work_t.\n");
                 FAILED_HERE();
                 *work_out = NULL;
                 return __LINE__;
@@ -178,7 +161,8 @@ static int add_work_to_queue_delayed(struct workqueue_struct *queue,
         ret = queue_delayed_work(queue, (struct delayed_work*)*work_out, delay);
         if (ret == 0)
         {
-                printk(KERN_ALERT "The work %p already added.\n", *work_out);
+                printk(KERN_ALERT "clli: The work %p already added.\n",
+                       *work_out);
                 FAILED_HERE();
                 return __LINE__;
         }
@@ -190,13 +174,15 @@ static int work_queue_module_init(void)
 {
         int ret;
 
-        printk(KERN_ALERT "Clli work_queue example init.\n");
+        /* Announce the beginning of example and log process state. */
+        printk(KERN_ALERT "clli: work_queue example init.\n");
+        log_proc_info();
 
         /* Create a work queue first. */
         my_wq = create_workqueue("my_queue");
         if (!my_wq)
         {
-                printk(KERN_ALERT "Failed to create work queue.\n");
+                printk(KERN_ALERT "clli: Failed to create work queue.\n");
                 FAILED_HERE();
                 return __LINE__;
         }
@@ -228,6 +214,6 @@ static int work_queue_module_init(void)
   
 static void work_queue_module_exit(void)
 {
-        printk(KERN_ALERT "Clli work_queue example exits.\n");
+        printk(KERN_ALERT "clli: work_queue example exits.\n");
         destroy_workqueue(my_wq);
 }
