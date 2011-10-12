@@ -4,10 +4,13 @@
 
 #include "proc_info.h"
 
-void log_proc_info(void)
+void proc_info(const char *who)
 {
-        printk(KERN_ALERT "clli: Running in process with pid:0x%08lx.\n",
-               (unsigned long)current->pid);
+        if (who == NULL)
+        {
+                who = "Unknown";
+        }
+        
+        printk(KERN_ALERT "clli: %s runs in pid:0x%08lx.\n",
+               who, (unsigned long)current->pid);
 }
-
-EXPORT_SYMBOL(log_proc_info);
