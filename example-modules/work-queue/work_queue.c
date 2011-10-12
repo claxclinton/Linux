@@ -11,6 +11,11 @@
 
 #include "proc_info.h"
 
+/* FIXME: Remove this: */
+#if 0
+#include "proc_info.c"
+#endif
+
 #define FAILED_HERE() printk(KERN_ALERT "clli:Failed %s:%d.\n", \
                              __FILE__, __LINE__)
 
