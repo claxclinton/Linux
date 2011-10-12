@@ -1,7 +1,6 @@
-/* This example shows usage of work queues. Both normal work and
- * delayed work are demonstrated. The type my_work_t is used for both.
- * When a work is actually performed, it output the value of the
- * member x.
+/* This example shows how to create and schedule a tasklet.
+ * The data available for the tasklet is '123' which is printk:ed by
+ * the function registered as tasklet.
  */
 
 #include "linux/module.h"
